@@ -55,3 +55,23 @@ class TestApp:
             assert(response.get_json().get('message') == 
                 'Maximum pageview limit reached')
 
+    def test_session_initialization(self):
+        '''initializes session['page_views'] to 0 on first request.'''
+        with app.test_client() as client:
+            client.get('/articles/1')
+            assert(flask.session.get('page_views') == 1)
+
+            client.get('/clear')  # Clear session
+            assert(flask.session.get('page_views') == 0)
+
+            client.get('/articles/2')
+            assert(flask.session.get('page_views') == 1)
+
+            client.get('/articles/3')
+            assert(flask.session.get('page_views') == 2)
+
+            client.get('/articles/4')
+            assert(flask.session.get('page_views') == 3)
+
+            client.get('/articles/5')
+            assert(flask.session.get('page_views') == 4)

@@ -2,7 +2,6 @@
 
 from flask import Flask, make_response, jsonify, session
 from flask_migrate import Migrate
-
 from models import db, Article, User
 
 app = Flask(__name__)
@@ -22,13 +21,21 @@ def clear_session():
 
 @app.route('/articles')
 def index_articles():
-
     pass
 
 @app.route('/articles/<int:id>')
 def show_article(id):
+    # Initialize session page_views if not set
+    session['page_views'] = session.get('page_views', 0) + 1
 
-    pass
+    if session['page_views'] > 3:
+        return jsonify({'message': 'Maximum pageview limit reached'}), 401
+
+    # Fetch the article from the database
+    article = Article.query.get(id)
+    if article:
+        return jsonify(article.serialize()), 200
+    return jsonify({'message': 'Article not found'}), 404
 
 if __name__ == '__main__':
     app.run(port=5555)
